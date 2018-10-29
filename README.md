@@ -1,4 +1,4 @@
-## OPNsense unbound adblock
+# OPNsense unbound adblock
 
 Action and script to add & update adblock lists with a cron job in GUI.
 
