@@ -6,13 +6,13 @@ echo "Removing old files..."
 
 # Awk regex to be inverse-matched as whitelist
 # - SolveMedia is needed for captchas on some websites
-whitelist='api.solvemedia.com|localhost'$(awk '{printf "|%s", tolower($1)}' /usr/home/whitelist.txt)
+whitelist='api.solvemedia.com|localhost|0.0.0.0'$(awk 'NF {printf "|%s", tolower($1)}' /usr/home/whitelist.txt)
 
 # Blacklists
-blacklist='https://1hosts.cf/
-https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/fakenews-gambling-porn-social/hosts
-https://bit.ly/AIO-adblock
-https://raw.githubusercontent.com/hoshsadiq/adblock-nocoin-list/master/hosts.txt'
+blacklist='https://raw.githubusercontent.com/EnergizedProtection/block/master/unified/formats/hosts
+https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/fakenews-gambling-porn/hosts'
+
+#https://raw.githubusercontent.com/EnergizedProtection/block/master/ultimate/formats/hosts
 
 # Fetch all Blacklist Files
 echo "Fetching Blacklists..."
@@ -21,7 +21,7 @@ for url in $blacklist; do
 done
 
 # Including additional_zones.txt
-awk '{printf "127.0.0.1 %s\n", tolower($1)}' /usr/home/additional_zones.txt >> "/tmp/hosts.working"
+awk 'NF {printf "127.0.0.1 %s\n", tolower($1)}' /usr/home/additional_zones.txt >> "/tmp/hosts.working"
 
 # Process Blacklist, Eliminiating Duplicates, Integrating Whitelist, and Converting to unbound format
 echo "Processing Blacklist..."
