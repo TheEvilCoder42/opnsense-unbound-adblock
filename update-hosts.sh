@@ -25,12 +25,21 @@ awk 'NF {printf "127.0.0.1 %s\n", tolower($1)}' /usr/home/additional_zones.txt >
 
 # Process Blacklist, Eliminiating Duplicates, Integrating Whitelist, and Converting to unbound format
 echo "Processing Blacklist..."
-awk -v whitelist="$whitelist" '$1 ~ /^127\.|^0\./ && $2 !~ whitelist {gsub("\r",""); print tolower($2)}' /tmp/hosts.working | sort -u | \
-awk '{printf "server:\n", $1; printf "local-data: \"%s A 0.0.0.0\"\n", $1}' > /var/unbound/ad-blacklist.conf
+awk -v whitelist="$whitelist" '$1 ~ /^127\.|^0\./ && $2 !~ whitelist && $2 !~ /\.\./ {gsub("\r",""); print tolower($2)}' /tmp/hosts.working | sort -u | \
+awk '{printf "server:\n", $1; printf "local-data: \"%s A 0.0.0.0\"\n", $1}' > /var/unbound/ad-blacklist_new.conf
 
-# Make unbound reload config to activate the new blacklist
-echo "Restarting Unbound..."
-pluginctl dns
+# Check config
+if unbound-checkconf /var/unbound/ad-blacklist_new.conf; then
+    mv /var/unbound/ad-blacklist_new.conf /var/unbound/ad-blacklist.conf
+
+    # Make unbound reload config to activate the new blacklist
+    echo "Restarting Unbound..."
+    pluginctl dns
+else
+    # FATAL ERROR
+    echo "Invalid Config! FATAL ERROR..."
+    exit 1
+fi
 
 # Clean up tempfile
 echo "Cleaning Up..."
